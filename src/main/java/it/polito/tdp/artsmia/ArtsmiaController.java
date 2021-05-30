@@ -1,8 +1,12 @@
 package it.polito.tdp.artsmia;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.artsmia.model.Adiacenza;
+import it.polito.tdp.artsmia.model.Artist;
 import it.polito.tdp.artsmia.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,7 +35,7 @@ public class ArtsmiaController {
     private Button btnCalcolaPercorso;
 
     @FXML
-    private ComboBox<?> boxRuolo;
+    private ComboBox<String> boxRuolo;
 
     @FXML
     private TextField txtArtista;
@@ -42,23 +46,54 @@ public class ArtsmiaController {
     @FXML
     void doArtistiConnessi(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Calcola artisti connessi");
+    	String ruolo=this.boxRuolo.getValue();
+    	this.model.creaGrafo(ruolo);
+    	List<Adiacenza> lista=new ArrayList<Adiacenza>(this.model.getArtistiConnessi(ruolo));
+    	for(Adiacenza a:lista)
+    	{
+    		this.txtResult.appendText(a.toString()+"\n");
+    	}
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Calcola percorso");
-    }
+    	String num=this.txtArtista.getText();
+    	Integer numI=0;
+    	try {
+    		numI=Integer.parseInt(num);
+    	}catch(NumberFormatException e)
+    	{
+    		e.printStackTrace();
+    	}
+    	if(this.model.contieneGrafo(numI)==false)
+    	{
+    		txtResult.appendText("NON PRESENTE NEL GRAFO");
+    	}
+    	else
+    	{
+    	List<Artist> artisti=this.model.trovaPercorso(numI);
+    	this.txtResult.appendText("IL PERCORSO PIU' LUNGO HA LUNGHEZZA "+artisti.size()+"ED E' COMPOSTO DA :\n");
+    	for(Artist a:artisti)
+    	{
+    		this.txtResult.appendText(a.toString()+"\n");
+    	}
+    	}
+    } 
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Crea grafo");
+    	String ruolo=this.boxRuolo.getValue();
+    	this.model.creaGrafo(ruolo);
+    	txtResult.appendText("GRAFO CREATO!\n");
+    	txtResult.appendText("# vertici: "+this.model.getVertici()+"\n");
+    	txtResult.appendText("# archi: "+this.model.getArchi()+"\n");
     }
 
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxRuolo.getItems().addAll(this.model.getRuoli());
     }
 
     
