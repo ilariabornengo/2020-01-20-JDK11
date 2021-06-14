@@ -46,54 +46,46 @@ public class ArtsmiaController {
     @FXML
     void doArtistiConnessi(ActionEvent event) {
     	txtResult.clear();
-    	String ruolo=this.boxRuolo.getValue();
-    	this.model.creaGrafo(ruolo);
-    	List<Adiacenza> lista=new ArrayList<Adiacenza>(this.model.getArtistiConnessi(ruolo));
+    	String categoria=this.boxRuolo.getValue();
+    	List<Adiacenza> lista=new ArrayList<Adiacenza>(this.model.liste(categoria));
     	for(Adiacenza a:lista)
     	{
-    		this.txtResult.appendText(a.toString()+"\n");
+    		txtResult.appendText(a.toString()+"\n");
     	}
     }
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
     	txtResult.clear();
-    	String num=this.txtArtista.getText();
-    	Integer numI=0;
+    	String idS=this.txtArtista.getText();
+    	Integer id=0;
     	try {
-    		numI=Integer.parseInt(num);
+    		id=Integer.parseInt(idS);
     	}catch(NumberFormatException e)
     	{
     		e.printStackTrace();
     	}
-    	if(this.model.contieneGrafo(numI)==false)
+    	List<Artist> best=new ArrayList<Artist>(this.model.percorsoMassimo(id));
+    	for(Artist a:best)
     	{
-    		txtResult.appendText("NON PRESENTE NEL GRAFO");
+    		txtResult.appendText(a.toString()+"\n");
     	}
-    	else
-    	{
-    	List<Artist> artisti=this.model.trovaPercorso(numI);
-    	this.txtResult.appendText("IL PERCORSO PIU' LUNGO HA LUNGHEZZA "+artisti.size()+"ED E' COMPOSTO DA :\n");
-    	for(Artist a:artisti)
-    	{
-    		this.txtResult.appendText(a.toString()+"\n");
-    	}
-    	}
+    	
     } 
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
-    	String ruolo=this.boxRuolo.getValue();
-    	this.model.creaGrafo(ruolo);
-    	txtResult.appendText("GRAFO CREATO!\n");
-    	txtResult.appendText("# vertici: "+this.model.getVertici()+"\n");
-    	txtResult.appendText("# archi: "+this.model.getArchi()+"\n");
+    	String categoria=this.boxRuolo.getValue();
+    	this.model.creaGrafo(categoria);
+    	this.txtResult.appendText("GRAFO CREATO!!\n");
+    	this.txtResult.appendText("# archi: "+this.model.getArchi()+"\n");
+    	this.txtResult.appendText("# vertici: "+this.model.getVertici()+"\n");
     }
 
     public void setModel(Model model) {
     	this.model = model;
-    	this.boxRuolo.getItems().addAll(this.model.getRuoli());
+    	this.boxRuolo.getItems().addAll(this.model.getCategorie());
     }
 
     

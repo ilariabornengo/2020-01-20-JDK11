@@ -66,10 +66,11 @@ public class ArtsmiaDAO {
 			return null;
 		}
 	}
-public List<String> listRuoli() {
+
+public List<String> getRuoli() {
 		
-		String sql = "SELECT DISTINCT a.role as ruolo "
-				+ "FROM authorship a ";
+		String sql = "SELECT distinct a.role as ruolo "
+				+ "FROM authorship a " ;
 		List<String> result = new ArrayList<>();
 		Connection conn = DBConnect.getConnection();
 
@@ -77,6 +78,7 @@ public List<String> listRuoli() {
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
+				
 				result.add(res.getString("ruolo"));
 			}
 			conn.close();
@@ -87,18 +89,19 @@ public List<String> listRuoli() {
 			return null;
 		}
 	}
-	public void getVertici(Map<Integer,Artist> idMap, String ruolo) {
+
+	public void getVertici(Map<Integer,Artist> idMap,String categoria) {
 		
-		String sql = "SELECT a.artist_id AS id,a.name AS nome "
+		String sql = "SELECT distinct a.artist_id AS id, a.name AS nome "
 				+ "FROM artists a, authorship au "
-				+ "WHERE a.artist_id=au.artist_id "
+				+ "WHERE au.artist_id=a.artist_id "
 				+ "AND au.role=? " ;
 		
 		Connection conn = DBConnect.getConnection();
 	
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
-			st.setString(1, ruolo);
+			st.setString(1, categoria);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
 				if(!idMap.containsKey(res.getInt("id")))
@@ -106,38 +109,43 @@ public List<String> listRuoli() {
 					Artist a=new Artist(res.getInt("id"),res.getString("nome"));
 					idMap.put(a.getArtistID(), a);
 				}
+				
 			}
 			conn.close();
-			
+		
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			
 		}
-}
-	public List<Adiacenza> getAdiacenze(Map<Integer,Artist> idMap,String ruolo) {
+	}
+	
+
+	public List<Adiacenza> getAdiacenze(Map<Integer,Artist> idMap,String categoria) {
 			
-			String sql = "SELECT a1.artist_id AS id1, a2.artist_id AS id2, COUNT(o1.exhibition_id) AS peso "
-					+ "FROM authorship a1, authorship a2,exhibition_objects o1,exhibition_objects o2 "
-					+ "WHERE a1.object_id=o1.object_id "
-					+ "AND a2.object_id=o2.object_id "
-					+ "AND o1.exhibition_id=o2.exhibition_id "
-					+ "AND a1.artist_id> a2.artist_id "
+			String sql = "SELECT a1.artist_id AS id1, a2.artist_id AS id2, count(distinct e1.exhibition_id) AS peso "
+					+ "FROM authorship a1, authorship a2, objects o1, objects o2, exhibition_objects e1, exhibition_objects e2 "
+					+ "WHERE a1.object_id=o1.object_id AND o1.object_id=e1.object_id "
+					+ "AND a2.object_id=o2.object_id AND o2.object_id=e2.object_id "
 					+ "AND a1.role=a2.role AND a1.role=? "
-					+ "GROUP BY a1.artist_id,a2.artist_id " ;
-			List<Adiacenza> result = new ArrayList<Adiacenza>();
+					+ "AND a1.artist_id> a2.artist_id "
+					+ "AND a1.object_id!=o2.object_id "
+					+ "AND e1.exhibition_id=e2.exhibition_id "
+					+ "GROUP BY a1.artist_id, a2.artist_id " ;
+			List<Adiacenza> result = new ArrayList<>();
 			Connection conn = DBConnect.getConnection();
 	
 			try {
 				PreparedStatement st = conn.prepareStatement(sql);
-				st.setString(1, ruolo);
+				st.setString(1, categoria);
 				ResultSet res = st.executeQuery();
 				while (res.next()) {
-					if(idMap.containsKey(res.getInt("id1"))&& idMap.containsKey(res.getInt("id2")))
-					{
-						Adiacenza a=new Adiacenza(idMap.get(res.getInt("id1")),idMap.get(res.getInt("id2")),res.getInt("peso"));
-						result.add(a);
-					}
+				if(idMap.containsKey(res.getInt("id1")) && idMap.containsKey(res.getInt("id2")))
+				{
+					Adiacenza a=new Adiacenza(idMap.get(res.getInt("id1")),idMap.get(res.getInt("id2")),res.getInt("peso"));
+					result.add(a);
+				}
+					
 				}
 				conn.close();
 				return result;

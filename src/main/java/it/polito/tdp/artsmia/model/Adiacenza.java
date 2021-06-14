@@ -1,7 +1,7 @@
 package it.polito.tdp.artsmia.model;
 
 public class Adiacenza {
-	
+
 	Artist a1;
 	Artist a2;
 	Integer peso;
@@ -31,9 +31,8 @@ public class Adiacenza {
 	}
 	@Override
 	public String toString() {
-		return a1.getNome() + " - " + a2.getNome() + " peso= " + peso;
+		return a1.getNome()+" - "+a2.getNome()+" - "+peso;
 	}
 	
-
 	
 }
