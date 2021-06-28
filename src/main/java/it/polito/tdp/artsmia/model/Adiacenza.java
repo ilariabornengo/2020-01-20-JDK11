@@ -31,7 +31,7 @@ public class Adiacenza {
 	}
 	@Override
 	public String toString() {
-		return a1.getNome()+" - "+a2.getNome()+" - "+peso;
+		return a1+" - "+a2+" ("+peso+")";
 	}
 	
 	

@@ -28,10 +28,6 @@ public class Model {
 		this.dao=new ArtsmiaDAO();
 	}
 	
-	public List<String> getCategorie()
-	{
-		return this.dao.getRuoli();
-	}
 	public void creaGrafo(String categoria)
 	{
 		this.idMap=new HashMap<Integer,Artist>();
@@ -50,18 +46,69 @@ public class Model {
 			}
 		}
 	}
-	
-	public List<Adiacenza> liste(String categoria)
+	public List<Adiacenza> getConnesso(String categoria)
 	{
-		List<Adiacenza> lista=new ArrayList<Adiacenza> ();
+		List<Adiacenza> OK=new ArrayList<Adiacenza>();
 		for(Adiacenza a:this.dao.getAdiacenze(idMap, categoria))
 		{
-			lista.add(a);
+			OK.add(a);
 		}
-		Collections.sort(lista, new ComparatorPesoA());
-		return lista;
+		Collections.sort(OK, new ComparatorNExp());
+		return OK;
+		
 	}
-	public int getArchi()
+	public List<Artist> getListaBest(Artist a)
+	{
+		this.listaBest=new ArrayList<Artist>();
+		List<Artist> parziale=new ArrayList<Artist>();
+		parziale.add(a);
+		ricorsione(parziale,-1);
+		return this.listaBest;
+		
+	}
+	public List<Artist> artisti()
+	{
+		List<Artist> arti=new ArrayList<Artist>(this.grafo.vertexSet());
+		return arti;
+	}
+	private void ricorsione(List<Artist> parziale, int pesoI) {
+		Artist ultimo=parziale.get(parziale.size()-1);
+		
+		for(Artist a:Graphs.neighborListOf(this.grafo, ultimo))
+		{
+			int peso=0;
+			if(pesoI==-1)
+			{
+				if(!parziale.contains(a))
+				{
+					parziale.add(a);
+					peso=(int) this.grafo.getEdgeWeight(this.grafo.getEdge(ultimo, a));
+					ricorsione(parziale,peso);
+					parziale.remove(a);
+				}
+			}else{
+				int pesoA=(int) this.grafo.getEdgeWeight(this.grafo.getEdge(ultimo, a));
+				if(pesoA==peso)
+				{
+					if(!parziale.contains(a))
+					{
+						parziale.add(a);
+						ricorsione(parziale,peso);
+						parziale.remove(a);
+					}
+				}
+			}
+		}
+		
+		if(parziale.size()>this.listaBest.size())
+		{
+			this.listaBest=new ArrayList<Artist>(parziale);
+			return;
+		}
+		
+	}
+
+	public int getArchi() 
 	{
 		return this.grafo.edgeSet().size();
 	}
@@ -70,46 +117,8 @@ public class Model {
 		return this.grafo.vertexSet().size();
 	}
 	
-	public List<Artist> percorsoMassimo(int idA)
+	public List<String> categorie()
 	{
-		Artist a=null;
-		for(Artist ar:this.grafo.vertexSet())
-		{
-			if(ar.getArtistID()==idA)
-			{
-				a=ar;
-			}
-		}
-		this.listaBest=new ArrayList<Artist>();
-		List<Artist> parziale=new ArrayList<Artist>();
-		parziale.add(a);
-		ricorsione(parziale,-1);
-		return this.listaBest;
-		
-	}
-
-	private void ricorsione(List<Artist> parziale,int peso) {
-		Artist ultimo=parziale.get(parziale.size()-1);
-		
-		for(Artist ar:Graphs.neighborListOf(this.grafo, ultimo))
-		{
-			// caso iniziale, devo settare il peso
-			if(!parziale.contains(ar) && peso==-1)
-			{
-				parziale.add(ar);
-				peso=(int) this.grafo.getEdgeWeight(this.grafo.getEdge(ultimo, ar));
-				ricorsione(parziale,peso);
-				parziale.remove(ar);
-			}else if(!parziale.contains(ar) && this.grafo.getEdgeWeight(this.grafo.getEdge(ultimo, ar))==peso)
-			{
-				parziale.add(ar);
-				ricorsione(parziale,peso);
-				parziale.remove(ar);
-			}
-		}
-		if(parziale.size()>this.listaBest.size())
-		{
-			this.listaBest=new ArrayList<Artist>(parziale);
-		}
+		return this.dao.getCategorie();
 	}
 }

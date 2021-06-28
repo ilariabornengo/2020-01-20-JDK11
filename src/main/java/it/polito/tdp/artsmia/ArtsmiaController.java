@@ -47,10 +47,16 @@ public class ArtsmiaController {
     void doArtistiConnessi(ActionEvent event) {
     	txtResult.clear();
     	String categoria=this.boxRuolo.getValue();
-    	List<Adiacenza> lista=new ArrayList<Adiacenza>(this.model.liste(categoria));
-    	for(Adiacenza a:lista)
+    	if(categoria==null)
     	{
-    		txtResult.appendText(a.toString()+"\n");
+    		txtResult.appendText("selezionare una categoria\n");
+    	}else
+    	{
+    		List<Adiacenza> connessi=new ArrayList<Adiacenza>(this.model.getConnesso(categoria));
+    		for(Adiacenza a:connessi)
+    		{
+    			txtResult.appendText(a.toString()+"\n");
+    		}
     	}
     }
 
@@ -65,27 +71,43 @@ public class ArtsmiaController {
     	{
     		e.printStackTrace();
     	}
-    	List<Artist> best=new ArrayList<Artist>(this.model.percorsoMassimo(id));
-    	for(Artist a:best)
+    	if(idS==null || id==0)
     	{
-    		txtResult.appendText(a.toString()+"\n");
+    		Artist artista=null;
+    		for(Artist a:this.model.artisti())
+    		{
+    			if(a.getArtistID().equals(id))
+    			{
+    				artista=a;
+    			}
+    		}
+    		List<Artist> best=new ArrayList<Artist>(this.model.getListaBest(artista));
+    		for(Artist ar:best)
+    		{
+    			txtResult.appendText(ar.toString()+"\n");
+    		}
     	}
-    	
     } 
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
     	String categoria=this.boxRuolo.getValue();
-    	this.model.creaGrafo(categoria);
-    	this.txtResult.appendText("GRAFO CREATO!!\n");
-    	this.txtResult.appendText("# archi: "+this.model.getArchi()+"\n");
-    	this.txtResult.appendText("# vertici: "+this.model.getVertici()+"\n");
+    	if(categoria==null)
+    	{
+    		txtResult.appendText("selezionare una categoria\n");
+    	}else
+    	{
+    		this.model.creaGrafo(categoria);
+    		txtResult.appendText("grafo creato!\n");
+    		txtResult.appendText("# vertici: "+this.model.getVertici()+"\n");
+    		txtResult.appendText("# archi: "+this.model.getArchi()+"\n");
+    	}
     }
 
     public void setModel(Model model) {
     	this.model = model;
-    	this.boxRuolo.getItems().addAll(this.model.getCategorie());
+    	this.boxRuolo.getItems().addAll(this.model.categorie());
     }
 
     
